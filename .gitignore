@@ -1,2 +1,6 @@
 # ignore all csvs
 *.csv
+# ignore all json files
+*.json
+# ignore pycache
+__pycache__/
