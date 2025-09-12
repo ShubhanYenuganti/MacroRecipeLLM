@@ -55,7 +55,7 @@ echo "Ollama batch job finished"
 
 if __name__ == "__main__":
     csv_input = "preprocess/recipes_clean.csv"
-    csv_output = "recipes_with_cuisine_ollama.csv"
+    csv_output = "recipes_with_meal_category_ollama.csv"
 
     script_path = setup_ollama_batch_job(csv_input, "llama3.2:1b")
     print("\nRunning batch job script...")

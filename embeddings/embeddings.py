@@ -44,9 +44,7 @@ def create_semantic_text(row):
     description = str(row.get('Description', ''))[:200] # Truncate long descriptions
     keywords = str(row.get('Keywords', ''))
     flavor_profile = str(row.get('flavor_profile', '')).title()
-    
     dietary_tags = create_dietary_tags(row)
-    meal_type = categorize_meal_type(row)
     
     text = f"""
     Recipe: {row['name']}
@@ -56,7 +54,7 @@ def create_semantic_text(row):
     Cuisine Style: {row['cuisine_style']}
     Dietary Profile: {', '.join(dietary_tags)}
     Flavor Characteristics: {flavor_profile}
-    Meal Type: {meal_type}
+    Meal Type: {row['meal_type']}
     """.strip()
     
     return text
@@ -129,7 +127,6 @@ def create_comprehensive_text(row):
     {procedural}
     
     Quality Score: {row.get('quality_score', 0.5):.2f}
-    Popularity Score: {row.get('popularity_score', 0.5):.2f}
     Overall Rating: {row.get('AggregatedRating', 0):.1f}/5.0
     Number of Reviews: {row.get('ReviewCount', 0)} reviews
     """.strip()
@@ -146,7 +143,7 @@ def create_metadata_json(row):
         "servings": int(row.get('RecipeServings', 1)),
         
         # Timing information
-        "total_time_minutes": float(row.get('total_time_minutes', 0)),
+        "total_time_minutes": float(row.get('TotalTime', 0)),
         "prep_time": float(row.get('PrepTime', 0)),
         "cook_time": float(row.get('CookTime', 0)),
         
