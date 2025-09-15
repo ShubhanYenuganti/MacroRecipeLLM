@@ -395,6 +395,6 @@ def analyze_recipe_flavors(df):
     
     return df
 
-df = pd.read_csv("preprocess/recipes_complete.csv")
+df = pd.read_csv("recipes_feature_eng.csv")
 
-analyze_recipe_flavors(df).to_csv("preprocess/recipes_with_flavors.csv", index=False)
+analyze_recipe_flavors(df).to_csv("recipes_with_flavors.csv", index=False)

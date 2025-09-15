@@ -171,5 +171,5 @@ def calculate_quality_score(df):
     return (rating_norm * 0.7 + review_norm * 0.3)
 
 # Usage:
-df = feature_eng('preprocess/recipes_clean.csv')  # Prefer the cleaned CSV
-df.to_csv('preprocess/recipes_complete.csv', index=False)
+df = feature_eng('recipes_clean.csv')  # Prefer the cleaned CSV
+df.to_csv('recipes_feature_eng.csv', index=False)

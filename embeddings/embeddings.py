@@ -51,10 +51,10 @@ def create_semantic_text(row):
     Category: {category}
     Description: {description}
     Keywords: {keywords}
-    Cuisine Style: {row['cuisine_style']}
+    Cuisine Style: {row['predicted_cuisine']}
     Dietary Profile: {', '.join(dietary_tags)}
     Flavor Characteristics: {flavor_profile}
-    Meal Type: {row['meal_type']}
+    Meal Type: {row['predicted_meal_category']}
     """.strip()
     
     return text

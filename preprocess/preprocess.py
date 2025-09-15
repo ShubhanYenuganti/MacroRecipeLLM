@@ -52,5 +52,5 @@ def r_vector_to_list(x):
     return [str(i) for i in items]  
 
 
-df = preprocess('preprocess/recipes.csv')
-df.to_csv("preprocess/recipes_clean.csv", index=False)
+df = preprocess('recipes.csv')
+df.to_csv("recipes_clean.csv", index=False)
