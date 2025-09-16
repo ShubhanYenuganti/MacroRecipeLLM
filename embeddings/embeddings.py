@@ -40,14 +40,14 @@ def transform_for_bedrock_kb(csv_path, output_csv_path):
 def create_semantic_text(row):
     """Creates semantic embedding text focusing on recipe identity"""
     
-    category = str(row.get('category', 'Unknown')).title()
+    category = str(row.get('RecipeCategory', 'Unknown')).title()
     description = str(row.get('Description', ''))[:200] # Truncate long descriptions
     keywords = str(row.get('Keywords', ''))
     flavor_profile = str(row.get('flavor_profile', '')).title()
     dietary_tags = create_dietary_tags(row)
     
     text = f"""
-    Recipe: {row['name']}
+    Recipe: {row['Name']}
     Category: {category}
     Description: {description}
     Keywords: {keywords}
@@ -90,12 +90,15 @@ def create_nutritional_text(row):
     return text
 
 def create_procedural_text(row):
-    """Creates procedural embedding text focusing on cookin process"""
+    """Creates procedural embedding text focusing on cooking process"""
     
     total_time = row.get('TotalTime', 0)
     difficulty = row.get("difficulty_level", "Medium")
     complexity = row.get("complexity_score", 0.5)
     batch_friendliness = row.get("batch_friendliness_score", 0.5)
+    recipe_instructions = row.get("RecipeInstructions", "")
+    recipe_ingredients = row.get("RecipeIngredientParts", )
+    recipe_ingredient_quantities = row.get("RecipeIngredientQuantities", "")
     
     time_category = categorize_cooking_time(total_time)
     complexity_desc = describe_complexity(complexity)
@@ -103,6 +106,9 @@ def create_procedural_text(row):
     
     text = f"""
     Cooking Process: {row['Name']}
+    Recipe Instructions: {recipe_instructions}
+    Recipe Ingredients: {recipe_ingredients}
+    Recipe Quantities: {recipe_ingredient_quantities}
     Total Time: {total_time:.0f} minutes ({time_category})
     Difficulty Level: {difficulty}
     Complexity: {complexity_desc} (Score: {complexity:.2f})
@@ -288,28 +294,40 @@ def calculate_nutrient_density(row):
         'sugar_per_serving':   -0.1,
     }
     
-    # Min-max normalize each nutrient column
-    normed = pd.DataFrame()
-    for col in weights:
-        col_min, col_max = row[col].min(), row[col].max()
-        if col_max > col_min:  # avoid div0
-            normed[col] = (row[col] - col_min) / (col_max - col_min)
-        else:
-            normed[col] = 0.0
+    score = 0.0
+    total_weight = 0.0
     
-    # Apply weights
-    scores = np.zeros(len(row))
-    for col, w in weights.items():
-        scores += normed[col] * w
+    for col, weight in weights.items():
+        value = float(row.get(col, 0)) if pd.notna(row.get(col, 0)) else 0.0
+        
+        if value > 0:
+            # Normalize value based on typical ranges
+            if weight > 0:  # Beneficial nutrients
+                if col == 'protein_per_serving':
+                    normalized_value = min(value / 50.0, 1.0)  # 50g protein = max score
+                elif col == 'fiber_per_serving':
+                    normalized_value = min(value / 25.0, 1.0)  # 25g fiber = max score
+                else:
+                    normalized_value = min(value / 100.0, 1.0)
+            else:  # Limiting nutrients (negative weight)
+                if col == 'calories_per_serving':
+                    normalized_value = min(200.0 / max(value, 1.0), 1.0)  # Lower calories = better
+                elif col == 'sodium_per_serving':
+                    normalized_value = min(500.0 / max(value, 1.0), 1.0)  # Lower sodium = better
+                elif col == 'sugar_per_serving':
+                    normalized_value = min(10.0 / max(value, 1.0), 1.0)   # Lower sugar = better
+                else:
+                    normalized_value = min(20.0 / max(value, 1.0), 1.0)   # Lower fat/cholesterol = better
+            
+            score += normalized_value * weight
+            total_weight += abs(weight)
     
-    # Shift to positive range if negatives exist
-    min_score, max_score = scores.min(), scores.max()
-    if max_score > min_score:
-        scores = (scores - min_score) / (max_score - min_score)
+    if total_weight > 0:
+        # Normalize final score to 0-1 range
+        final_score = (score + total_weight/2) / total_weight
+        return max(0.0, min(1.0, final_score))
     else:
-        scores = np.ones(len(row))  # all identical rows
-    
-    return scores
+        return 0.5  # default score when no nutritional data available  
 
 def categorize_cooking_time(minutes):
     if minutes < 20: return "Quick"
@@ -329,3 +347,63 @@ def determine_skill_level(complexity, difficulty):
         return "Intermediate"
     else:
         return "Advanced"
+
+def main():
+    """Main function to run the Bedrock KB transformation"""
+    
+    # Configuration
+    INPUT_CSV = "/Users/shubhan/MacroRecipe/MacroRecipeLLM/ready_for_embeddings.csv"  # Input CSV with all features
+    OUTPUT_CSV = "/Users/shubhan/MacroRecipe/MacroRecipeLLM/bedrock_kb_recipes.csv"           # Output for Bedrock Knowledge Base
+    
+    print("Starting Bedrock Knowledge Base transformation...")
+    print(f"Input file: {INPUT_CSV}")
+    print(f"Output file: {OUTPUT_CSV}")
+    
+    try:
+        # Run the transformation
+        kb_df = transform_for_bedrock_kb(INPUT_CSV, OUTPUT_CSV)
+        
+        # Display summary statistics
+        print("\n" + "="*50)
+        print("TRANSFORMATION SUMMARY")
+        print("="*50)
+        
+        print(f"Total recipes processed: {len(kb_df)}")
+        print(f"Columns in output: {list(kb_df.columns)}")
+        
+        # Show sample of the transformed data
+        print("\nSample of transformed data:")
+        print("-" * 30)
+        for i in range(min(3, len(kb_df))):
+            row = kb_df.iloc[i]
+            print(f"\nRecipe {i+1}: {row['title']}")
+            print(f"Text length: {len(row['text'])} characters")
+            print(f"Text preview: {row['text'][:200]}...")
+            
+            # Parse and show metadata sample
+            try:
+                metadata = json.loads(row['metadata'])
+                print(f"Metadata keys: {list(metadata.keys())[:10]}...")  # Show first 10 keys
+            except:
+                print("Metadata: [Could not parse]")
+        
+        print("\n" + "="*50)
+        print("Transformation completed successfully!")
+        print("="*50)
+        
+        return kb_df
+        
+    except FileNotFoundError:
+        print(f"ERROR: Input file '{INPUT_CSV}' not found!")
+        print("Please ensure the file exists in the current directory.")
+        return None
+        
+    except Exception as e:
+        print(f"ERROR during transformation: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+if __name__ == "__main__":
+    # Run the main function
+    result_df = main()
