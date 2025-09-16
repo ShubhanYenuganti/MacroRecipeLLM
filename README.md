@@ -63,18 +63,18 @@ Each item includes: `recipe_name`, `meal_type`, `macros`, `instructions`, `ingre
 ]
 ```
 
+# AWS Workflow: S3 → OpenSearch Serverless → Bedrock Knowledge Base → Bedrock Agent (Nova Premier) → Lambda URL API
+We store pre-chunked CSV exports of the embedded-ready CSVs in **Amazon S3**.  
+**Amazon Bedrock Knowledge Bases** ingests those objects, generates embeddings, and stores vectors in **Amazon OpenSearch Serverless**.  
+A **Bedrock Agent** (LLM: **Amazon Nova Premier**) uses the Knowledge Base for retrieval and produces **structured JSON** outputs.  
+An **AWS Lambda** function exposes a **Function URL** that calls to query the Agent and returns the output.
+
 # Dataset
 Utilizes following Kaggle dataset [Food.com - Recipes and Reviews](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?resource=download).
 
 ## Original Schema
 Kaggle dataset originally contained following metadata:  
 **Cook Time**, **PrepTime**, **TotalTime**, **Description**, **RecipeCategory**, **RecipeCategory**, **Keywords**, **RecipeIngredientQuantities**, **RecipeIngredientParts**, **AggregatedRating**, **ReviewCount**, **Calories**, **Calories**, **FatContent**, **SaturatedFatContent**, **Cholestrol**, **SodiumContent**, **CarbohydrateContent**, **FiberContent**, **SugarContent**, **ProteinContent**, **RecipeInstructions**
-
-# AWS Workflow: S3 → OpenSearch Serverless → Bedrock Knowledge Base → Bedrock Agent (Nova Premier) → Lambda URL API
-We store pre-chunked CSV exports of the embedded-ready CSVs in **Amazon S3**.  
-**Amazon Bedrock Knowledge Bases** ingests those objects, generates embeddings, and stores vectors in **Amazon OpenSearch Serverless**.  
-A **Bedrock Agent** (LLM: **Amazon Nova Premier**) uses the Knowledge Base for retrieval and produces **structured JSON** outputs.  
-An **AWS Lambda** function exposes a **Function URL** that calls to query the Agent and returns the output.
 
 # Data Transformation
 features.py adds **Complexity Score**, **Batch Friendliness Score**, **Difficulty Level** as additional columns to the dataset.  
