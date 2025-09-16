@@ -15,7 +15,7 @@ Each item includes: `recipe_name`, `meal_type`, `macros`, `instructions`, `ingre
     "macros": { "protein": 40, "carbs": 50, "fat": 15 },
     "instructions": [
       "Cook 1.2 cups quinoa",
-      "Saut\u00e9 1.2 lbs turkey breast",
+      "Sautee 1.2 lbs turkey breast",
       "Mix with spinach and avocado"
     ],
     "ingredients": [
