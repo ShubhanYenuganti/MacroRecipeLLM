@@ -1,5 +1,67 @@
 # MacroRecipeLLM
-Attempt at fine-tuning an LLM to be able to provide an end-user a recipe recommendation based on their desired macros and other factors. 
+Created a RAG workflow that allows a user to query for recipes from a lambda function url endpoint. 
+## Query: 
+I want xxg protein, xxg carbs, xxg fat for lunch  
+## Response
+Returns a JSON array of three recipes that closely match the requested macros.  
+Each item includes: `recipe_name`, `meal_type`, `macros`, `instructions`, `ingredients`, and `servings`.
+
+### Example
+```json
+[
+  {
+    "recipe_name": "Protein-Packed Quinoa Bowl",
+    "meal_type": "lunch",
+    "macros": { "protein": 40, "carbs": 50, "fat": 15 },
+    "instructions": [
+      "Cook 1.2 cups quinoa",
+      "Saut\u00e9 1.2 lbs turkey breast",
+      "Mix with spinach and avocado"
+    ],
+    "ingredients": [
+      "1.2 cups quinoa",
+      "1.2 lbs lean turkey",
+      "2 cups spinach",
+      "1/2 avocado"
+    ],
+    "servings": 2
+  },
+  {
+    "recipe_name": "Mediterranean Chicken Plate",
+    "meal_type": "lunch",
+    "macros": { "protein": 40, "carbs": 50, "fat": 15 },
+    "instructions": [
+      "Grill 6 oz chicken",
+      "Serve with 1/2 cup bulgur",
+      "Add tzatziki and olives"
+    ],
+    "ingredients": [
+      "6 oz chicken breast",
+      "1/2 cup bulgur wheat",
+      "1/4 cup tzatziki",
+      "10 olives"
+    ],
+    "servings": 1
+  },
+  {
+    "recipe_name": "Power Lentil Salad",
+    "meal_type": "lunch",
+    "macros": { "protein": 40, "carbs": 50, "fat": 15 },
+    "instructions": [
+      "Cook 1.5 cups lentils",
+      "Mix with diced veggies",
+      "Top with hard-boiled egg"
+    ],
+    "ingredients": [
+      "1.5 cups lentils",
+      "1 bell pepper",
+      "1 carrot",
+      "1 hard-boiled egg"
+    ],
+    "servings": 2
+  }
+]
+```
 
 # Dataset
 Utilizes following Kaggle dataset [Food.com - Recipes and Reviews](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?resource=download).
